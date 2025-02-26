@@ -1,14 +1,27 @@
-# build-static-tmux
+# Build static tmux from scratch
 
-A script or building a static tmux for linux which should run on a wide selection of distributions (tested on Ubuntu, SLES12)
+This repo fixes bugs in the upsteam and support tmux 3.5a.
 
-**Versions**
-* [tmux 3.5](https://github.com/tmux/tmux/)
-* [musl 1.2.5](https://musl.libc.org/)
-* [ncurses 6.5](https://invisible-island.net/ncurses/)
-* [libevent 2.1.12](https://github.com/libevent/libevent/)
+## Dependency
 
-Binaries available in releases.
-Build with GitHub actions (Ubuntu 18.04, x86_64-pc-linux-gnu)
+* musl
+* ncurses
+* libevent
 
-![Build Status](https://github.com/mjakob-gh/build-static-tmux/actions/workflows/build.yml/badge.svg)
+## Build
+
+```
+# Download
+git clone https://github.com/mjakob-gh/build-static-tmux.git && cd build-static-tmux
+
+# Build and start the container
+docker build -t build_tmux -f Dockerfile .
+docker run -it --name build_tmux build_tmux bash
+
+# (In container) Build tmux and the dependency
+bash ./build.sh
+
+# (On host) copy the built binary
+docker cp build_tmux:/root/tmux-static/bin/tmux.linux-amd64.stripped.gz ./
+gunzip tmux.linux-amd64.stripped.gz
+```
