@@ -12,7 +12,7 @@ This repo fixes bugs in the upsteam and support tmux 3.5a.
 
 ```
 # Download
-git clone https://github.com/mjakob-gh/build-static-tmux.git && cd build-static-tmux
+git clone https://github.com/zhenhuaw-me/build-static-tmux.git && cd build-static-tmux
 
 # Build and start the container
 docker build -t build_tmux -f Dockerfile .
