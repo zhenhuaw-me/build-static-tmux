@@ -15,7 +15,7 @@ COLOR_END="\033[0m"
 PGM="${0##*/}" # Program basename
 
 # Scriptversion
-VERSION=3.5
+VERSION=3.5a
 
 # How many lines of the error log should be displayed
 LOG_LINES=50
@@ -24,7 +24,7 @@ LOG_LINES=50
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 
 # sigh, in linux some use "x86_64", "aarch64"
-# and others "amd64" or "arm64" the upx developers 
+# and others "amd64" or "arm64" the upx developers
 case "$(uname -m)" in
     "aarch64")
         ARCH="arm64"
@@ -42,7 +42,7 @@ TMUX_BIN="tmux.${OS}-${ARCH}"
 ######################################
 ###### BEGIN VERSION DEFINITION ######
 ######################################
-TMUX_VERSION=3.5
+TMUX_VERSION=${VERSION}
 MUSL_VERSION=1.2.5
 NCURSES_VERSION=6.5
 LIBEVENT_VERSION=2.1.12
@@ -51,8 +51,7 @@ UPX_VERSION=4.2.4
 ####### END VERSION DEFINITION #######
 ######################################
 
-#TMUX_STATIC_HOME="${HOME}/tmux-static"
-TMUX_STATIC_HOME="${TMUX_STATIC_HOME:-/tmp/tmux-static}"
+TMUX_STATIC_HOME="${TMUX_STATIC_HOME:-/${PWD}/tmux-static}"
 
 LOG_DIR="${TMUX_STATIC_HOME}/log"
 
@@ -62,8 +61,8 @@ TMUX_URL="https://github.com/tmux/tmux/releases/download/${TMUX_VERSION}"
 MUSL_ARCHIVE="musl-${MUSL_VERSION}.tar.gz"
 MUSL_URL="https://www.musl-libc.org/releases"
 
-NCURSES_ARCHIVE="ncurses.tar.gz"
-NCURSES_URL="https://invisible-island.net/datafiles/release"
+NCURSES_ARCHIVE="ncurses-${NCURSES_VERSION}.tar.gz"
+NCURSES_URL="https://invisible-island.net/archives/ncurses"
 
 LIBEVENT_ARCHIVE="libevent-${LIBEVENT_VERSION}-stable.tar.gz"
 LIBEVENT_URL="https://github.com/libevent/libevent/releases/download/release-${LIBEVENT_VERSION}-stable"
@@ -249,7 +248,6 @@ cd musl-${MUSL_VERSION} || exit 1
 printf "Configuring..."
 ./configure \
     --enable-gcc-wrapper \
-    --disable-shared \
     --prefix=${TMUX_STATIC_HOME} \
     --bindir=${TMUX_STATIC_HOME}/bin \
     --includedir=${TMUX_STATIC_HOME}/include \
@@ -371,6 +369,9 @@ checkResult $?
 
 cd tmux-${TMUX_VERSION} || exit 1
 
+# somehow the built libs have the suffix.
+libsuffix=w
+
 printf "Configuring..."
 ./configure --prefix=${TMUX_STATIC_HOME} \
     --enable-static \
@@ -380,10 +381,10 @@ printf "Configuring..."
     LDFLAGS="-L${TMUX_STATIC_HOME}/lib" \
     CPPFLAGS="-I${TMUX_STATIC_HOME}/include" \
     LIBEVENT_LIBS="-L${TMUX_STATIC_HOME}/lib -levent" \
-    LIBNCURSES_CFLAGS="-I${TMUX_STATIC_HOME}/include/ncurses" \
-    LIBNCURSES_LIBS="-L${TMUX_STATIC_HOME}/lib -lncurses" \
-    LIBTINFO_CFLAGS="-I${TMUX_STATIC_HOME}/include/ncurses" \
-    LIBTINFO_LIBS="-L${TMUX_STATIC_HOME}/lib -ltinfo" >> ${LOG_DIR}/${LOG_FILE} 2>&1
+    LIBNCURSES_CFLAGS="-I${TMUX_STATIC_HOME}/include/ncurses${libsuffix}" \
+    LIBNCURSES_LIBS="-L${TMUX_STATIC_HOME}/lib -lncurses${libsuffix}" \
+    LIBTINFO_CFLAGS="-I${TMUX_STATIC_HOME}/include/ncurses${libsuffix}" \
+    LIBTINFO_LIBS="-L${TMUX_STATIC_HOME}/lib -ltinfo${libsuffix}" >> ${LOG_DIR}/${LOG_FILE} 2>&1
 checkResult $?
 
 # patch file.c
